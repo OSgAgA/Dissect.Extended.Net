@@ -55,3 +55,11 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/Dissect.Extended.Net/.vs/Dissect.Extended.Net.slnx/DesignTimeBuild
+/Dissect.Extended.Net/.vs/Dissect.Extended.Net.slnx/FileContentIndex
+/Dissect.Extended.Net/.vs/Dissect.Extended.Net.slnx/v18/TestStore/0
+/Dissect.Extended.Net/.vs/Dissect.Extended.Net.slnx/v18
+/.vs/Dissect.Extended.Net.slnx/FileContentIndex
+/.vs/Dissect.Extended.Net.slnx/v18/TestStore/0
+/.vs/Dissect.Extended.Net.slnx/v18
+/.vs
