@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Dissect.Extended.Net.Library/Dissect.Extended.Net.Library.csproj" />
+  <Project Path="Dissect.Extended.Net.Tests/Dissect.Extended.Net.Tests.csproj" />
+</Solution>
