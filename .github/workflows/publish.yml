@@ -118,9 +118,9 @@ jobs:
       # Publishes the nuget package to NuGet.org.
       - name: Publish to NuGet.org
         run: |
-          dotnet nuget push "*.nupkg" `
-            --api-key "${{ secrets.NUGET_API_KEY }}" `
-            --source https://api.nuget.org/v3/index.json `
+          dotnet nuget push "*.nupkg" \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
 
       # As we created a tag, the new commit must be merged back to develop.
