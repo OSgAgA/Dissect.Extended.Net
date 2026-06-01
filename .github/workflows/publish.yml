@@ -105,11 +105,13 @@ jobs:
               git push origin ${{ steps.version.outputs.version }}
             fi
 
+      # Creates the nuget package using the nuspec file.
       - name: Create NuGet package
         run: |
           nuget pack Dissect.Extended.Net.nuspec \
             -Version ${{ env.VERSION }}
       
+      # Publishes the nuget package to NuGet.org.
       - name: Publish to NuGet.org
         run: |
           dotnet nuget push "*.nupkg" `
