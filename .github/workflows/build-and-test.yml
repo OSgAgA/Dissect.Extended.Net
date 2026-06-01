@@ -49,10 +49,12 @@ jobs:
 
       # Build the application.
       - name: Build
+        working-directory: Dissect.Extended.Net
         run: dotnet build -c Release --no-restore -warnaserror
 
       # Run tests and generate TestResults file.
       - name: Test
+        working-directory: Dissect.Extended.Net
         run: dotnet test --logger "trx;LogFileName=TestResults.trx"
 
       # Publish the test report.
