@@ -66,7 +66,7 @@ jobs:
         if: failure() || success() 
         with:
           name: .NET Tests
-          path: Dissect.Extended.Net/TestResults/TestResults.trx
+          path: Dissect.Extended.Net/Dissect.Extended.Net/Dissect.Extended.Net/Dissect.Extended.Net.Tests/TestResults/TestResults.trx
           reporter: dotnet-trx
 
       # Upload test results as artifacts.
