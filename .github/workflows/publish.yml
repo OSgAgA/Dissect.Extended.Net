@@ -13,9 +13,6 @@ permissions:
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'Dissect.Extended.Net/Dissect.Extended.Net.Library/**'
-      - 'Dissect.Extended.Net/Dissect.Extended.Net.Tests/**'
 
 jobs:
   # Publishes the application
