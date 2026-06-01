@@ -44,6 +44,7 @@ jobs:
 
       # Restore nuget.
       - name: Restore
+        working-directory: Dissect.Extended.Net
         run: dotnet restore
 
       # Build the application.
@@ -63,7 +64,7 @@ jobs:
         if: failure() || success() 
         with:
           name: .NET Tests
-          path: mqtt2otel.Tests/TestResults/TestResults.trx
+          path: Dissect.Extended.Net.Tests/TestResults/TestResults.trx
           reporter: dotnet-trx
 
       # Upload test results as artifacts.
