@@ -1,0 +1,120 @@
+name: DeployApplication
+
+# Workflow can 
+#   * write repositroy content
+#   * create and update GitHub Checks.
+#   * comment on PRs, update PR statuses, or modify PR metadata.
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+# Only executed on pushes to the main branch.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dissect.Extended.Net/Dissect.Extended.Net.Library/**'
+      - 'Dissect.Extended.Net/Dissect.Extended.Net.Tests/**'
+
+jobs:
+  # Publishes the application
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+
+    steps:
+      # Get the pullrequest number from the commit message and store it in PR_NUMBER.
+      - name: Extract PR number (safe)
+        id: pr
+        run: |
+            PR_NUMBER=$(echo "${{ github.event.head_commit.message }}" | grep -oE '#[0-9]+' | tr -d '#' || true)
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      # Try to find a github label named version:X.Y.Z and write it to VERSION if found.
+      - name: Fetch PR labels
+        id: pr_labels
+        if: steps.pr.outputs.pr_number != ''
+        run: |
+            PR_NUMBER=${{ steps.pr.outputs.pr_number }}
+
+            LABELS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/labels \
+              | jq -r '.[].name')
+
+            VERSION=""
+            for label in $LABELS; do
+              if [[ "$label" == version:* ]]; then
+                VERSION="${label#version:}"
+              fi
+            done
+
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # Take version from previous step if existing. If not existing, then get the latest git tag that has the
+      # form: X.Y.Z and take this as the version X.Y.Z+1. If no tag is found, then the version is set to 0.1.0.
+      #
+      # Version is then split int $MAJOR, $MINOR, $PATCH.
+      - name: Determine version
+        id: version
+        run: |
+            VERSION="${{ steps.pr_labels.outputs.version }}"
+
+            if [[ -z "$VERSION" ]]; then
+              LATEST=$(git tag -l '[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n 1)
+
+              if [[ -z "$LATEST" ]]; then
+                VERSION="0.1.0"
+              else
+                IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST"
+                PATCH=$((PATCH + 1))
+                VERSION="$MAJOR.$MINOR.$PATCH"
+              fi
+            fi
+
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Invalid version format: $VERSION"
+              exit 1
+            fi
+
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+            echo "major=$MAJOR" >> $GITHUB_OUTPUT
+            echo "minor=$MINOR" >> $GITHUB_OUTPUT
+            echo "patch=$PATCH" >> $GITHUB_OUTPUT
+
+      # Create a git tag with the version number. This tag is then used, next time the workflow is triggered
+      # to create a new version number.
+      - name: Create and push git tag
+        run: |
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+
+            if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+              echo "Tag already exists, skipping"
+            else
+              git tag ${{ steps.version.outputs.version }}
+              git push origin ${{ steps.version.outputs.version }}
+            fi
+
+      - name: Create NuGet package
+        run: |
+          nuget pack Dissect.Extended.Net.nuspec \
+            -Version ${{ env.VERSION }}
+      
+      - name: Publish to NuGet.org
+        run: |
+          dotnet nuget push "*.nupkg" `
+            --api-key "${{ secrets.NUGET_API_KEY }}" `
+            --source https://api.nuget.org/v3/index.json `
+            --skip-duplicate
+
+      # As we created a tag, the new commit must be merged back to develop.
+      - name: Sync main back to develop
+        run: |
+          git fetch origin
+          git checkout develop
+          git merge origin/main --no-edit
+          git push origin develop
