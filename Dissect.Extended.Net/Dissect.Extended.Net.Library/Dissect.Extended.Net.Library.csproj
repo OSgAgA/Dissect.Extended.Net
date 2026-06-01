@@ -10,6 +10,9 @@
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>dissect;parser;log-parser;log-parsing;text-parsing;structured-logging</PackageTags>
+    <RepositoryUrl>https://github.com/OSgAgA/Dissect.Extended.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
 
     <PackageId>Dissect.Extended.Net</PackageId>
     <Authors>OSgAgA</Authors>
