@@ -54,7 +54,7 @@ jobs:
 
       # Run tests and generate TestResults file.
       - name: Test
-        working-directory: Dissect.Extended.Net
+        working-directory: Dissect.Extended.Net.Tests
         run: dotnet test --logger "trx;LogFileName=TestResults.trx"
 
       # Publish the test report.
