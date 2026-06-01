@@ -118,7 +118,7 @@ jobs:
       # Publishes the nuget package to NuGet.org.
       - name: Publish to NuGet.org
         run: |
-          dotnet nuget push "*.nupkg" \
+          dotnet nuget push "packages/*.nupkg" \
             --api-key "${{ secrets.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
