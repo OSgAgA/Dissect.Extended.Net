@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
 
     <PackageId>Dissect.Extended.Net</PackageId>
     <Authors>OSgAgA</Authors>
