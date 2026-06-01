@@ -107,10 +107,13 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       # Creates the nuget package using the nuspec file.
-      - name: Create NuGet package
+      - name: Create NuGet package.
         run: |
-          nuget pack Dissect.Extended.Net.nuspec \
-            -Version ${{ env.VERSION }}
+          dotnet pack \
+            Dissect.Extended.Net/Dissect.Extended.Net.Library/Dissect.Extended.Net.Library.csproj \
+            -c Release \
+            -p:PackageVersion=${{ steps.version.outputs.version }} \
+            -o ./packages
       
       # Publishes the nuget package to NuGet.org.
       - name: Publish to NuGet.org

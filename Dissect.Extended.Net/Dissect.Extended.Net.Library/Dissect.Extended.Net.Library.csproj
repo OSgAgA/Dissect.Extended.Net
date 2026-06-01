@@ -6,4 +6,18 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <PackageId>Dissect.Extended.Net</PackageId>
+    <Authors>OSgAgA</Authors>
+    <Description>
+      A Dissect parser extracts structured data from a string by matching it against a predefined pattern. The parser compares the input string with the pattern and splits the input according to the Dissect rules.
+
+      This .NET implementation is fully compatible with the original specification while adding support for typed values beyond strings. It also provides a way to define append separators directly within the pattern.
+    </Description>
+
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
 </Project>
