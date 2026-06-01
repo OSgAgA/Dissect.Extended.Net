@@ -126,6 +126,11 @@ namespace Dissect.Extended.Net.Library
             public string typeParameterBuffer = string.Empty;
 
             /// <summary>
+            /// The buffer containting the separator information of an append modifier.
+            /// </summary>
+            public string? separatorBuffer = null;
+
+            /// <summary>
             /// A value indicating, whether a key is partial.
             /// </summary>
             public bool isPartial;
@@ -171,6 +176,7 @@ namespace Dissect.Extended.Net.Library
                 this.isReferentialKey = false;
                 this.isReferentialValue = false;
                 this.isRightPaddingActive = false;
+                this.separatorBuffer = null;
 
                 this.order = 0;
             }
@@ -236,7 +242,15 @@ namespace Dissect.Extended.Net.Library
                         else if (c == '+')
                         {
                             parseBuffer.isPartial = true;
-                            state = States.Key;
+                            if (nextChar == '[')
+                            {
+                                state = States.Separator;
+                                i = i + 1;
+                            }
+                            else
+                            {
+                                state = States.Key;
+                            }
                         }
                         else if (c == '*')
                         {
@@ -254,13 +268,32 @@ namespace Dissect.Extended.Net.Library
                             state = States.Key;
                         }
                         break;
+                    // Parses a separator for an append modifier.
+                    case States.Separator:
+                        if (c == ']')
+                        {
+                            if (parseBuffer.separatorBuffer == null) parseBuffer.separatorBuffer = string.Empty;
+                            state = States.Key;
+                        }
+                        else
+                        {
+                            if (parseBuffer.separatorBuffer == null)
+                            {
+                                parseBuffer.separatorBuffer = c.ToString();
+                            }
+                            else
+                            {
+                                parseBuffer.separatorBuffer += c;
+                            }
+                        }
+                        break;
                     // Parses a key after all left side modifiers are handled.
                     case States.Key:
                         if (c == '}')
                         {
                             if (!string.IsNullOrWhiteSpace(parseBuffer.buffer))
                             {
-                                dissectPattern.Elements.Add(new Key(parseBuffer.buffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue));
+                                dissectPattern.Elements.Add(new Key(parseBuffer.buffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, separator: parseBuffer.separatorBuffer));
                             }
 
                             parseBuffer.Reset();
@@ -282,7 +315,7 @@ namespace Dissect.Extended.Net.Library
                         {
                             if (!string.IsNullOrWhiteSpace(parseBuffer.buffer) && parseBuffer.buffer != "?")
                             {
-                                dissectPattern.Elements.Add(new Key(parseBuffer.buffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue));
+                                dissectPattern.Elements.Add(new Key(parseBuffer.buffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, separator: parseBuffer.separatorBuffer));
                             }
 
                             parseBuffer.Reset();
@@ -315,7 +348,7 @@ namespace Dissect.Extended.Net.Library
                                 dissectPattern.IsValid = false;
                             }
 
-                            dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.typeBuffer));
+                            dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.typeBuffer, separator: parseBuffer.separatorBuffer));
                             parseBuffer.Reset();
                             state = States.Start;
                         }
@@ -348,7 +381,7 @@ namespace Dissect.Extended.Net.Library
                                     dissectPattern.ErrorMessage += $"Order value '{parseBuffer.buffer}' must be a valid integer.\n";
                                     dissectPattern.IsValid = false;
                                 }
-                                dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.typeBuffer));
+                                dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.typeBuffer, separator: parseBuffer.separatorBuffer));
                             }
 
                             parseBuffer.Reset();
@@ -367,7 +400,7 @@ namespace Dissect.Extended.Net.Library
                         {
                             if (string.IsNullOrEmpty(parseBuffer.typeBuffer)) parseBuffer.typeBuffer = parseBuffer.buffer;
 
-                            dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.typeBuffer, typeParameter: parseBuffer.typeParameterBuffer));
+                            dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.typeBuffer, typeParameter: parseBuffer.typeParameterBuffer, separator: parseBuffer.separatorBuffer));
                             parseBuffer.Reset();
                             state = States.Start;
                         }
@@ -375,7 +408,7 @@ namespace Dissect.Extended.Net.Library
                         {
                             if (!string.IsNullOrWhiteSpace(parseBuffer.buffer) && parseBuffer.buffer != "?")
                             {
-                                dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.buffer));
+                                dissectPattern.Elements.Add(new Key(parseBuffer.keyBuffer, parseBuffer.isPartial, parseBuffer.isReferentialKey, parseBuffer.isReferentialValue, parseBuffer.order, type: parseBuffer.buffer, separator: parseBuffer.separatorBuffer));
                             }
 
                             parseBuffer.Reset();
@@ -427,6 +460,11 @@ namespace Dissect.Extended.Net.Library
             if (parseBuffer.buffer.Length > 0 && state == States.TypeParameter)
             {
                 dissectPattern.ErrorMessage += $"Could not read type parameter. Missing ']' at end of {parseBuffer.buffer}.\n";
+                dissectPattern.IsValid = false;
+            }
+            else if (parseBuffer.buffer.Length > 0 && state == States.Separator)
+            {
+                dissectPattern.ErrorMessage += $"Could not read type separator pattern. Missing ']' at end of {parseBuffer.buffer}.\n";
                 dissectPattern.IsValid = false;
             }
             else if (parseBuffer.buffer.Length > 0 && state != States.Delimiter && state != States.Error)

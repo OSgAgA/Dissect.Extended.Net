@@ -1,4 +1,5 @@
 ﻿using Dissect.Extended.Net.Library;
+using Newtonsoft.Json.Linq;
 using System.Globalization;
 using Xunit.Abstractions;
 
@@ -19,6 +20,24 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParsePartialStringValues(string input, string pattern, string expectedKey, string expectedResult)
         {
             var parser = new Parser(pattern);
+            var result = parser.Parse(input);
+
+            Assert.True(result.Success);
+            var resultDict = result.ToDictionary();
+            Assert.Single(resultDict);
+            Assert.True(resultDict.ContainsKey(expectedKey));
+            Assert.Equal(expectedResult, resultDict[expectedKey]);
+        }
+
+        [Theory]
+        [InlineData("this is a test", "%{+[,]a} %{+a}", "a", "this,is a test")]
+        [InlineData("this is a test", "%{+a} %{+a}", "a", "this*is a test")]
+        [InlineData("this is a test", "%{+[...]a} %{+a}", "a", "this...is a test")]
+        [InlineData("this is a test", "%{+[]a} %{+a}", "a", "thisis a test")]
+        [InlineData("this is a test", "%{+[+]a} %{+[-]a} %{a} %{a}", "a", "this+is-a-test")]
+        public void ShouldUseCorrectSeparatorForAppendModifier(string input, string pattern, string expectedKey, string expectedResult)
+        {
+            var parser = new Parser(pattern, separator: "*");
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -56,6 +75,22 @@ namespace mqtt2otel.Tests._10_UnitTests
             Assert.Single(resultDict);
             Assert.True(resultDict.ContainsKey("key"));
             Assert.Equal("value", resultDict["key"]);
+        }
+
+        [Fact]
+        public void ShouldParseDateTimeFromReferenceModifier()
+        {
+            string pattern = "%{*a} %{&a:DateTime}";
+            string input = "StartOfYear 2026-01-01";
+            var parser = new Parser(pattern);
+            var result = parser.Parse(input);
+
+            Assert.True(result.Success);
+            var resultDict = result.ToDictionary();
+            Assert.Single(resultDict);
+            Assert.True(resultDict.ContainsKey("StartOfYear"));
+            Assert.IsType<DateTime>(resultDict["StartOfYear"]);
+            Assert.Equal(new DateTime(2026,1,1), resultDict["StartOfYear"]);
         }
 
         [Theory]
@@ -248,6 +283,24 @@ namespace mqtt2otel.Tests._10_UnitTests
             var result = parser.Parse(input);
 
             Assert.False(result.Success, description);
+        }
+
+        [Fact]
+        public void JustATest()
+        {
+            var parser = new Parser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
+
+            if (!parser.IsValid) throw new Exception("invalid parse expression");
+
+            var result = parser.Parse("2026-05-31 19:20:41 [Info] Successfully connected to server.");
+
+            if (result.Success)
+            {
+                foreach (var keyValue in result.ToDictionary())
+                {
+                    string text = $"key: {keyValue.Key}, value: {keyValue.Value}";
+                }
+            }
         }
     }
 }

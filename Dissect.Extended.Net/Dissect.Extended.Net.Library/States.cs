@@ -45,6 +45,11 @@ namespace Dissect.Extended.Net.Library
         TypeParameter,
 
         /// <summary>
+        /// The state while parsing a separator of an append pattern.
+        /// </summary>
+        Separator,
+
+        /// <summary>
         /// The error state.
         /// </summary>
         Error

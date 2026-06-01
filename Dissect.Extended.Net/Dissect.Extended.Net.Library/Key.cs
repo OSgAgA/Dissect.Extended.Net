@@ -17,14 +17,16 @@ namespace Dissect.Extended.Net.Library
         /// <param name="order">The order number of the key to provide the order in which partial keys will be applied.</param>
         /// <param name="type">The data type of the key as a string representation.</param>
         /// <param name="typeParameter">The parameter string containing the optional parameters for the provided data type.</param>
+        /// <param name="separator">The separator for appending multiple keys with an append modifier. Overrides the default separator if set to a value that is not null.</param>
 
-        public Key(string name, bool isPartial = false, bool isReferenceKey = false, bool isReferenceValue = false, int order = 0, string type = "", string typeParameter = "")
+        public Key(string name, bool isPartial = false, bool isReferenceKey = false, bool isReferenceValue = false, int order = 0, string type = "", string typeParameter = "", string? separator = null)
         {
             this.Name = name;
             this.IsPartial = isPartial;
             this.IsReferenceValue = isReferenceValue;
             this.IsReferenceKey = isReferenceKey;
             this.Order = order;
+            this.Separator = separator;
 
             var typeResult = DataTypeParserFactory.ParseTypeInformation(type, typeParameter);
 
@@ -39,6 +41,11 @@ namespace Dissect.Extended.Net.Library
                 this.Type = typeResult.Result;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the separator used for appending multiple keys with an append modifier. Overrides the default separator if set to a value that is not null.
+        /// </summary>
+        public string? Separator { get; set;  } = null;
 
         /// <summary>
         /// Gets or sets a value indicating whether the key is in a valid state.

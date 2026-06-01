@@ -22,11 +22,13 @@ namespace Dissect.Extended.Net.Library
             /// <param name="value">The string representation of the value.</param>
             /// <param name="order">The order number of the key.</param>
             /// <param name="type">The data type of the value.</param>
-            public partialKey(string value, int order, TypeParser type)
+            /// <param name="separator">The seperator used for appending partial keys.</param>
+            public partialKey(string value, int order, TypeParser type, string? separator)
             {
                 Value = value;
                 Order = order;
                 Type = type;
+                Separator = separator;
             }
 
             /// <summary>
@@ -43,6 +45,11 @@ namespace Dissect.Extended.Net.Library
             /// The order of the partial key.
             /// </summary>
             public int Order;
+
+            /// <summary>
+            /// The seperator for appending partial keys.
+            /// </summary>
+            public string? Separator;
         }
 
         /// <summary>
@@ -110,14 +117,15 @@ namespace Dissect.Extended.Net.Library
         /// <param name="order">The order of the partial value.</param>
         /// <param name="value">The string representation of the value.</param>
         /// <param name="type">The data type of the value.</param>
-        private void AddPartialValue(string key, int order, string value, TypeParser type)
+        /// <param name="separator">The seperator used for appending partial values.</param>
+        private void AddPartialValue(string key, int order, string value, TypeParser type, string? separator)
         {
             if (!this.partialValues.ContainsKey(key))
             {
                 this.partialValues[key] = new List<partialKey>();
             }
 
-            this.partialValues[key].Add(new partialKey(value, order, type));
+            this.partialValues[key].Add(new partialKey(value, order, type, separator));
         }
 
         /// <summary>
@@ -143,15 +151,15 @@ namespace Dissect.Extended.Net.Library
             }
             else
             {
-                this.AddPartialValue(key.Name, key.Order, value, key.Type);
+                this.AddPartialValue(key.Name, key.Order, value, key.Type, key.Separator);
             }
         }
 
         /// <summary>
         /// Builds the real values out of the partial ones.
         /// </summary>
-        /// <param name="seperator">The separator used for appending the partial string values.</param>
-        internal void BuildPartialValues(string seperator)
+        /// <param name="separator">The separator used for appending the partial string values.</param>
+        internal void BuildPartialValues(string separator)
         {
             if (this.Success)
             {
@@ -164,8 +172,13 @@ namespace Dissect.Extended.Net.Library
 
                     foreach (var partialValue in item.Value.OrderBy(value => value.Order))
                     {
-                        if (!first) sb.Append(seperator);
+                        if (!first) sb.Append(separator);
                         first = false;
+
+                        if (partialValue.Separator != null)
+                        {
+                            separator = partialValue.Separator;
+                        }
 
                         sb.Append(partialValue.Value.ToString());
                         if (partialValue.Type != null)
