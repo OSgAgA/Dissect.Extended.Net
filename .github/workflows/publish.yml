@@ -24,6 +24,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Check out the repository.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       # Get the pullrequest number from the commit message and store it in PR_NUMBER.
       - name: Extract PR number (safe)
         id: pr
