@@ -102,6 +102,10 @@ jobs:
               git push origin ${{ steps.version.outputs.version }}
             fi
 
+      # Setup nuget tool.
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
       # Creates the nuget package using the nuspec file.
       - name: Create NuGet package
         run: |
