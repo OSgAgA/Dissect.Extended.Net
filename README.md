@@ -142,3 +142,6 @@ and a default separator of `*`, the following results are produced:
 | %{+[]a} %{+a}               | thisis a test    |                                                                                      |
 | %{+[+]a} %{+[-]a} %{a} %{a} | this+is-a-test   | The separator changes from `+` to `-` between the second and third append operation. |
 
+## Source code
+
+This library is published under the MIT-License (see license file for details). The source code can be found at [github](https://github.com/OSgAgA/Dissect.Extended.Net).
