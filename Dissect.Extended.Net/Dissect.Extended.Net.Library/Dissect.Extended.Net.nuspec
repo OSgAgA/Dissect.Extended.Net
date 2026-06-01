@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Dissect.Extended.Net</id>
+    <version>0.0.1</version>
+    <authors>OSgAgA</authors>
+    <owners>OSgAgA</owners>
+    <description>A Dissect parser extracts structured data from a string by matching it against a predefined pattern. The parser compares the input string with the pattern and splits the input according to the Dissect rules.
+
+For details about the original Dissect specification, see the official specification [here](https://github.com/elastic/dissect-specification/blob/master/README.md).
+
+This .NET implementation is fully compatible with the original specification while adding support for typedvalues beyond strings. It also provides a way to define append separators directly within the pattern.</description>
+  </metadata>
+  <files>
+    <file src="bin\Release\**\*.*" target="lib\netstandard2.0" />
+  </files>
+</package>
