@@ -64,3 +64,4 @@ nunit-*.xml
 /.vs/Dissect.Extended.Net.slnx/v18
 /.vs
 /Dissect.Extended.Net/.vs/ProjectEvaluation
+/src/.vs
