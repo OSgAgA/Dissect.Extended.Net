@@ -9,7 +9,7 @@ namespace Dissect.Extended.Net.Library
     /// <summary>
     /// Represents the extended .net dissect parser.
     /// </summary>
-    public class Parser
+    public class DissectParser
     {
         /// <summary>
         /// The pattern that was parsed from the initially provided string.
@@ -17,13 +17,13 @@ namespace Dissect.Extended.Net.Library
         private Pattern pattern;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Parser"/> class.
+        /// Initializes a new instance of the <see cref="DissectParser"/> class.
         /// </summary>
         /// <param name="pattern">The pattern for parsing messages.</param>
         /// <param name="separator">An optional separator for appending partial keys.</param>
-        public Parser(string pattern, string? separator = null)
+        public DissectParser(string pattern, string? separator = null)
         {
-            this.pattern = Parser.ParsePattern(pattern);
+            this.pattern = DissectParser.ParsePattern(pattern);
             if (separator != null) this.pattern.Separator = separator;
         }
 

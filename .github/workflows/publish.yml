@@ -110,7 +110,7 @@ jobs:
       - name: Create NuGet package.
         run: |
           dotnet pack \
-            Dissect.Extended.Net/Dissect.Extended.Net.Library/Dissect.Extended.Net.Library.csproj \
+            src/Dissect.Extended.Net.Library/Dissect.Extended.Net.Library.csproj \
             -c Release \
             -p:PackageVersion=${{ steps.version.outputs.version }} \
             -o ./packages
