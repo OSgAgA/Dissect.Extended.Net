@@ -31,7 +31,7 @@ This pattern parses the timestamp and interprets it using the IANA time zone `Eu
 The corresponding C# code:
 
 ```csharp
-var parser = new Parser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
+var parser = new DissectParser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
 
 if (!parser.IsValid) throw new Exception("invalid parse expression");
 
@@ -97,14 +97,14 @@ The `datetime` and `time` typed values also support the special time zone value 
 When a typed value is used together with the append modifier, all partial definitions of the same key should use the same data type:
 
 ```
-var parser = new Parser("%{value:DateTime} hello world %{+value:DateTime}", separator: " ");
+var parser = new DissectParser("%{value:DateTime} hello world %{+value:DateTime}", separator: " ");
 var result = parser.Parse("2026-05-01 hello world 19:26:12");
 ```
 
 Typed values can also be used with reference keys. In this case, the type should be defined on the value reference (`&`) part of the pair:
 
 ```csharp
-var parser = new Parser("%{*a} %{&a:DateTime}");
+var parser = new DissectParser("%{*a} %{&a:DateTime}");
 var result = parser.Parse("StartOfYear 2026-01-01");
 
 Console.WriteLine(resultDict["StartOfYear"]);

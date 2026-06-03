@@ -19,7 +19,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("this is a test", "%{+a} %{+a/1} %{+a/3} %{+a/2}", "a", "thisistesta")]
         public void ShouldParsePartialStringValues(string input, string pattern, string expectedKey, string expectedResult)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -37,7 +37,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("this is a test", "%{+[+]a} %{+[-]a} %{a} %{a}", "a", "this+is-a-test")]
         public void ShouldUseCorrectSeparatorForAppendModifier(string input, string pattern, string expectedKey, string expectedResult)
         {
-            var parser = new Parser(pattern, separator: "*");
+            var parser = new DissectParser(pattern, separator: "*");
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -52,7 +52,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("this is a test", "%{?} %{?} %{?} %{a}", "a", "test")]
         public void ShouldParseSkipKeys(string input, string pattern, string expectedKey, string expectedResult)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -67,7 +67,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         {
             string pattern = "%{*a} %{&a}";
             string input = "key value";
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -82,7 +82,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         {
             string pattern = "%{*a} %{&a:DateTime}";
             string input = "StartOfYear 2026-01-01";
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -101,7 +101,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("this is.:.:.:a test", "%{a} %{left->}.:%{right}", "is", "a test")]
         public void ShouldParseRightPadding(string input, string pattern, string expectedLeft, string expectedRight)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse(input);
 
             Assert.True(result.Success);
@@ -117,7 +117,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParseDateTime()
         {
             var expected = DateTime.SpecifyKind(new DateTime(2026, 5, 1, 19, 26, 12), DateTimeKind.Utc);
-            var parser = new Parser("%{value:DateTime}");
+            var parser = new DissectParser("%{value:DateTime}");
             var result = parser.Parse("2026-05-01 19:26:12");
 
             Assert.True(result.Success);
@@ -132,7 +132,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParseDateTimeWithExplicitTimeZone()
         {
             var expected = DateTime.SpecifyKind(new DateTime(2026, 5, 1, 17, 26, 12), DateTimeKind.Utc);
-            var parser = new Parser("%{value:DateTime[Europe/Berlin]}");
+            var parser = new DissectParser("%{value:DateTime[Europe/Berlin]}");
             var result = parser.Parse("2026-05-01 19:26:12");
 
             Assert.True(result.Success);
@@ -147,7 +147,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParseDateTimeWithLocalTimeZone()
         {
             var expected = new DateTime(2026, 5, 1, 19, 26, 12).ToUniversalTime();
-            var parser = new Parser("%{value:DateTime[local]}");
+            var parser = new DissectParser("%{value:DateTime[local]}");
             var result = parser.Parse("2026-05-01 19:26:12");
 
             Assert.True(result.Success);
@@ -162,7 +162,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParseDateTimeFromAppendModifier()
         {
             var expected = new DateTime(2026, 5, 1, 19, 26, 12);
-            var parser = new Parser("%{value:DateTime} hello world %{+value:DateTime}", separator: " ");
+            var parser = new DissectParser("%{value:DateTime} hello world %{+value:DateTime}", separator: " ");
             var result = parser.Parse("2026-05-01 hello world 19:26:12");
 
             Assert.True(result.Success);
@@ -193,7 +193,7 @@ namespace mqtt2otel.Tests._10_UnitTests
             _output.WriteLine($"  Parameter append: '{test.Append}'");
             _output.WriteLine($"  Parameter fail: '{test.Fail}'");
 
-            var parser = new Parser(test.Tok, separator: test.Append);
+            var parser = new DissectParser(test.Tok, separator: test.Append);
             var result = parser.Parse(test.Msg);
 
             if (test.Fail)
@@ -227,7 +227,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("%{a:double[non existing culture}", "Double data type with non existing culture identifier.")]
         public void ShouldFailParsingPattern(string pattern, string description)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
 
             Assert.False(parser.IsValid, description);
         }
@@ -244,7 +244,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("%{a:dOuBlE}", "123.45", typeof(double), 123.45)]
         public void ShouldReturnCorrectDataType(string pattern, string input, Type type, object expectedResult)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             Assert.True(parser.IsValid, $"Parsing pattern {pattern} is not valid.");
             var result = parser.Parse(input);
 
@@ -262,7 +262,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("%{+a:int/2} %{+a/1:int}")]
         public void ShouldParseModifierInArbitraryOrder(string pattern)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse("2 1");
 
             Assert.True(result.Success);
@@ -279,7 +279,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [InlineData("%{a:int", "Hello world", "Using int with input Hello world.")]
         public void ShouldFailInputParsing(string pattern, string input, string description)
         {
-            var parser = new Parser(pattern);
+            var parser = new DissectParser(pattern);
             var result = parser.Parse(input);
 
             Assert.False(result.Success, description);
@@ -288,7 +288,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         [Fact]
         public void JustATest()
         {
-            var parser = new Parser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
+            var parser = new DissectParser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
 
             if (!parser.IsValid) throw new Exception("invalid parse expression");
 
