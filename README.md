@@ -117,7 +117,7 @@ When using append modifiers such as `%{+key} %{+key}`, values can be joined usin
 A separator can be specified globally when creating the parser:
 
 ```csharp
-var parser = new Parser(pattern, separator: "*");
+var parser = new DissectParser(pattern, separator: "*");
 ```
 
 Alternatively, it can be defined directly within the pattern by placing it in brackets immediately after the append modifier (`+`).
