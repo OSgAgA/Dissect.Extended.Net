@@ -13,7 +13,7 @@ namespace Dissect.Extended.Net.Library
         /// <summary>
         /// The timezone of the time, that is read as the string input while parsing.
         /// </summary>
-        private TimeZoneInfo timeZoneInfo = TimeZoneInfo.Utc;
+        private TimeZoneInfo? timeZoneInfo = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DateAndTimeParser"/> class.
@@ -66,7 +66,7 @@ namespace Dissect.Extended.Net.Library
             {
                 case DataTypes.DateTime:
 
-                    success = success = DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out genericDate);
+                    success = DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out genericDate);
                     break;
                 case DataTypes.Time:
                     TimeOnly time;
@@ -83,7 +83,16 @@ namespace Dissect.Extended.Net.Library
                 return ParseResult<object>.CreateErrorResult($"Could not parse input '{input}' as DateTime.");
             }
 
-            var result = TimeZoneInfo.ConvertTime(genericDate, this.timeZoneInfo, TimeZoneInfo.Utc);
+            DateTime result = DateTime.MinValue;
+
+            if (this.timeZoneInfo == null || genericDate.Kind != DateTimeKind.Unspecified)
+            {
+                result = TimeZoneInfo.ConvertTime(genericDate, TimeZoneInfo.Utc);
+            }
+            else 
+            {
+                result = TimeZoneInfo.ConvertTime(genericDate, this.timeZoneInfo, TimeZoneInfo.Utc);
+            }
 
             return ParseResult<object>.CreateSuccessResult(result);
         }
