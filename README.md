@@ -92,7 +92,11 @@ The following data types are currently supported:
 
 All parameters are optional. Type names are case-insensitive.
 
-The `datetime` and `time` typed values also support the special time zone value `local`, which refers to the system's local time zone.
+The `datetime` and `time` typed values also support the special time zone value `local`, which refers to the system's local time zone. 
+
+[!NOTE] 
+The timezone parameter of a datetime or time type will be ignored if the timezone is explicitly set via the parsed format. So e.g. a value 
+"2026-05-31T19:20:41Z" will always be interpreted as UTC, independant of the timezone parameter.
 
 When a typed value is used together with the append modifier, all partial definitions of the same key should use the same data type:
 

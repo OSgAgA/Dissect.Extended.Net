@@ -90,7 +90,10 @@ namespace mqtt2otel.Tests._10_UnitTests
             Assert.Single(resultDict);
             Assert.True(resultDict.ContainsKey("StartOfYear"));
             Assert.IsType<DateTime>(resultDict["StartOfYear"]);
-            Assert.Equal(new DateTime(2026,1,1), resultDict["StartOfYear"]);
+            
+            var expected = TimeZoneInfo.ConvertTime(new DateTime(2026, 1, 1), TimeZoneInfo.Utc);
+
+            Assert.Equal(expected, resultDict["StartOfYear"]);
         }
 
         [Theory]
@@ -118,7 +121,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         {
             var expected = DateTime.SpecifyKind(new DateTime(2026, 5, 1, 19, 26, 12), DateTimeKind.Utc);
             var parser = new DissectParser("%{value:DateTime}");
-            var result = parser.Parse("2026-05-01 19:26:12");
+            var result = parser.Parse("2026-05-01T19:26:12Z");
 
             Assert.True(result.Success);
             var resultDict = result.ToDictionary();
@@ -162,6 +165,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParseDateTimeFromAppendModifier()
         {
             var expected = new DateTime(2026, 5, 1, 19, 26, 12);
+            expected = TimeZoneInfo.ConvertTime(expected, TimeZoneInfo.Utc);
             var parser = new DissectParser("%{value:DateTime} hello world %{+value:DateTime}", separator: " ");
             var result = parser.Parse("2026-05-01 hello world 19:26:12");
 
@@ -286,7 +290,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         }
 
         [Fact]
-        public void JustATest()
+        public void ShouldParseExplicitTimezone()
         {
             var parser = new DissectParser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
 
@@ -294,13 +298,25 @@ namespace mqtt2otel.Tests._10_UnitTests
 
             var result = parser.Parse("2026-05-31 19:20:41 [Info] Successfully connected to server.");
 
-            if (result.Success)
-            {
-                foreach (var keyValue in result.ToDictionary())
-                {
-                    string text = $"key: {keyValue.Key}, value: {keyValue.Value}";
-                }
-            }
+            Assert.True(result.Success);
+            var resultDict = result.ToDictionary();
+            Assert.True(resultDict.ContainsKey("timestamp"));
+            Assert.Equal(new DateTime(2026, 05, 31, 17, 20, 41, DateTimeKind.Utc), resultDict["timestamp"]);
+        }
+
+        [Fact]
+        public void ShouldParseExplicitTimezoneOverrideFromZuluTime()
+        {
+            var parser = new DissectParser("%{timestamp:DateTime[Europe/Berlin]} [%{log_level}] %{message}");
+
+            if (!parser.IsValid) throw new Exception("invalid parse expression");
+
+            var result = parser.Parse("2026-05-31T19:20:41Z [Info] Successfully connected to server.");
+
+            Assert.True(result.Success);
+            var resultDict = result.ToDictionary();
+            Assert.True(resultDict.ContainsKey("timestamp"));
+            Assert.Equal(new DateTime(2026,05,31,19,20,41, DateTimeKind.Utc), resultDict["timestamp"]);
         }
     }
 }
