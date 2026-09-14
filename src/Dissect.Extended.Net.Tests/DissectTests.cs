@@ -1,5 +1,4 @@
 ﻿using Dissect.Extended.Net.Library;
-using Newtonsoft.Json.Linq;
 using System.Globalization;
 using Xunit.Abstractions;
 
