@@ -60,4 +60,4 @@ jobs:
       # Run tests and generate TestResults file.
       - name: Test
         working-directory: src
-        run: ./Dissect.Extended.Net.Tests --report-gh
+        run: ./Dissect.Extended.Net.Tests/bin/Release/net10.0/Dissect.Extended.Net.Tests --report-gh
