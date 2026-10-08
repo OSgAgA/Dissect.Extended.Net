@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Globalization;
 using System.Text;
 
@@ -74,6 +75,7 @@ namespace Dissect.Extended.Net.Library
                     if (success)
                     {
                         genericDate = DateTime.Today.AddHours(time.Hour).AddMinutes(time.Minute).AddSeconds(time.Second);
+                        genericDate = DateTime.SpecifyKind(genericDate, DateTimeKind.Unspecified);
                     }
                     break;
             }
@@ -85,13 +87,30 @@ namespace Dissect.Extended.Net.Library
 
             DateTime result = DateTime.MinValue;
 
-            if (this.timeZoneInfo == null || genericDate.Kind != DateTimeKind.Unspecified)
+            if (this.timeZoneInfo == null)
             {
-                result = TimeZoneInfo.ConvertTime(genericDate, TimeZoneInfo.Utc);
+                if (genericDate.Kind != DateTimeKind.Unspecified)
+                {
+                    result = TimeZoneInfo.ConvertTime(genericDate, TimeZoneInfo.Utc);
+                }
+                else
+                {
+                    result = DateTime.SpecifyKind(genericDate, DateTimeKind.Utc);
+
+                }
             }
-            else 
+            else
             {
-                result = TimeZoneInfo.ConvertTime(genericDate, this.timeZoneInfo, TimeZoneInfo.Utc);
+                if (genericDate.Kind != DateTimeKind.Unspecified)
+                {
+                    result = TimeZoneInfo.ConvertTime(genericDate, this.timeZoneInfo);
+                }
+                else
+                {
+                    result = genericDate;
+                }
+
+                result = TimeZoneInfo.ConvertTime(result, this.timeZoneInfo, TimeZoneInfo.Utc);
             }
 
             return ParseResult<object>.CreateSuccessResult(result);

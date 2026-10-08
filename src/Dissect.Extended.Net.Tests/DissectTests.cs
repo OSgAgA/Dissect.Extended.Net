@@ -1,6 +1,5 @@
 ﻿using Dissect.Extended.Net.Library;
 using System.Globalization;
-using Xunit.Abstractions;
 
 namespace mqtt2otel.Tests._10_UnitTests
 {
@@ -90,7 +89,7 @@ namespace mqtt2otel.Tests._10_UnitTests
             Assert.True(resultDict.ContainsKey("StartOfYear"));
             Assert.IsType<DateTime>(resultDict["StartOfYear"]);
             
-            var expected = TimeZoneInfo.ConvertTime(new DateTime(2026, 1, 1), TimeZoneInfo.Utc);
+            var expected = DateTime.SpecifyKind(new DateTime(2026, 1, 1), DateTimeKind.Utc);
 
             Assert.Equal(expected, resultDict["StartOfYear"]);
         }
@@ -121,6 +120,21 @@ namespace mqtt2otel.Tests._10_UnitTests
             var expected = DateTime.SpecifyKind(new DateTime(2026, 5, 1, 19, 26, 12), DateTimeKind.Utc);
             var parser = new DissectParser("%{value:DateTime}");
             var result = parser.Parse("2026-05-01T19:26:12Z");
+
+            Assert.True(result.Success);
+            var resultDict = result.ToDictionary();
+            Assert.Single(resultDict);
+            Assert.True(resultDict.ContainsKey("value"));
+            Assert.IsType<DateTime>(resultDict["value"]);
+            Assert.Equal(expected, resultDict["value"]);
+        }
+
+        [Fact]
+        public void ShouldParseTimeOnly()
+        {
+            var expected = DateTime.SpecifyKind(new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 19, 26, 12), DateTimeKind.Utc);
+            var parser = new DissectParser("%{value:Time}");
+            var result = parser.Parse("19:26:12");
 
             Assert.True(result.Success);
             var resultDict = result.ToDictionary();
@@ -164,7 +178,7 @@ namespace mqtt2otel.Tests._10_UnitTests
         public void ShouldParseDateTimeFromAppendModifier()
         {
             var expected = new DateTime(2026, 5, 1, 19, 26, 12);
-            expected = TimeZoneInfo.ConvertTime(expected, TimeZoneInfo.Utc);
+            expected = DateTime.SpecifyKind(expected, DateTimeKind.Utc);
             var parser = new DissectParser("%{value:DateTime} hello world %{+value:DateTime}", separator: " ");
             var result = parser.Parse("2026-05-01 hello world 19:26:12");
 
