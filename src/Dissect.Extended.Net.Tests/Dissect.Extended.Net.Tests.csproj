@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <OutputType>exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,4 +31,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  
 </Project>
