@@ -101,7 +101,15 @@ namespace Dissect.Extended.Net.Library
             }
             else
             {
-                result = TimeZoneInfo.ConvertTime(genericDate, this.timeZoneInfo);
+                if (genericDate.Kind != DateTimeKind.Unspecified)
+                {
+                    result = TimeZoneInfo.ConvertTime(genericDate, this.timeZoneInfo);
+                }
+                else
+                {
+                    result = genericDate;
+                }
+
                 result = TimeZoneInfo.ConvertTime(result, this.timeZoneInfo, TimeZoneInfo.Utc);
             }
 
